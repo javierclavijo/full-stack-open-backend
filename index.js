@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req-data'));
 app.use(cors());
+app.use(express.static('build'))
 
 morgan.token('req-data', (req, res) => {
     const reqBody = JSON.stringify(req.body);

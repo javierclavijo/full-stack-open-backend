@@ -5,10 +5,8 @@ if (process.argv.length < 3 || process.argv.length === 4) {
     process.exit(1)
 }
 
-const password = process.argv[2]
-const url = `mongodb+srv://fullstackopen:${password}@cluster0.k68jk.mongodb.net/persons?retryWrites=true&w=majority`
 
-mongoose.connect(url, {
+mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,

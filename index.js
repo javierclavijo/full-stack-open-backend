@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const Person = require('./models/person')
 
 const app = express();
 
@@ -17,34 +19,16 @@ morgan.token('req-data', (req, res) => {
     return '';
 });
 
-let persons = [
-    {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-    },
-    {
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523",
-        "id": 2
-    },
-    {
-        "name": "Dan Abramov",
-        "number": "12-43-234345",
-        "id": 3
-    },
-    {
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122",
-        "id": 4
-    }
-]
+let persons = Person.find({});
 
 app.get('/api/persons', ((req, res) => {
-    res.json(persons);
+    Person.find({}).then(persons => {
+        res.json(persons);
+    })
 }));
 
 app.get('/info', (req, res) => {
+    console.log(persons)
     const info = '<div>' +
         `<p>Phonebook has info for ${persons.length} people</p>` +
         `<p>${Date()}</p>` +
@@ -53,14 +37,13 @@ app.get('/info', (req, res) => {
 });
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number.parseInt(req.params.id);
-    const person = persons.find(p => p.id === id);
-
-    if (person) {
-        res.json(person);
-    } else {
-        res.status(404).end();
-    }
+    Person.findById(req.params.id)
+        .then((person) => {
+            res.json(person);
+        })
+        .catch(() => {
+            res.status(404).end();
+        })
 });
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -70,17 +53,14 @@ app.delete('/api/persons/:id', (req, res) => {
 });
 
 app.post('/api/persons', (req, res) => {
-    const id = Math.floor(Math.random() * 10e10);
-    const body = req.body;
-    const person = {name: body.name, number: body.number, id: id};
-
-    if (!person.name || !person.number) {
-        res.status(400).json({error: 'No name or number provided.'});
-    } else if (persons.map(p => p.name).indexOf(person.name) !== -1) {
-        res.status(400).json({error: 'Name already in phonebook'});
+    if (!req.body.name || !req.body.number) {
+        res.status(400).json({error: 'Content missing'});
     } else {
-        persons.push(person);
-        res.json(person);
+        const newPerson = new Person(
+            {name: req.body.name, number: req.body.number})
+        newPerson
+            .save()
+            .then(person => res.json(person));
     }
 });
 

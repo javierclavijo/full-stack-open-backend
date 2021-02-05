@@ -19,8 +19,7 @@ morgan.token('req-data', (req, res) => {
     return '';
 });
 
-let persons = Person.find({});
-
+let persons = [];
 app.get('/api/persons', ((req, res) => {
     Person.find({}).then(persons => {
         res.json(persons);
@@ -36,20 +35,18 @@ app.get('/info', (req, res) => {
     res.send(info);
 });
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     Person.findById(req.params.id)
         .then((person) => {
             res.json(person);
         })
-        .catch(() => {
-            res.status(404).end();
-        })
+        .catch(next)
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number.parseInt(req.params.id);
-    persons = persons.filter(p => p.id !== id);
-    res.status(204).end();
+app.delete('/api/persons/:id', (req, res, next) => {
+    Person.findByIdAndDelete(req.params.id)
+        .then(() => res.status(204).end())
+        .catch(next)
 });
 
 app.post('/api/persons', (req, res) => {
@@ -63,6 +60,30 @@ app.post('/api/persons', (req, res) => {
             .then(person => res.json(person));
     }
 });
+
+app.put('/api/persons/:id', (req, res, next) => {
+    const updatedPerson = {name: req.body.name, number: req.body.number}
+    Person.findByIdAndUpdate(req.params.id, updatedPerson, {new: true})
+        .then(person => res.json(person))
+        .catch(next)
+})
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({error: 'unknown endpoint'});
+}
+
+app.use(unknownEndpoint);
+
+const errorHandler = (err, req, res, next) => {
+    console.error(err.message);
+
+    if (err.name === 'CastError' && err.kind === 'ObjectId') {
+        return res.status(400).send({error: 'malformatted id'})
+    }
+    next(err)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

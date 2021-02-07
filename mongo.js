@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 if (process.argv.length < 3 || process.argv.length === 4) {
     console.log('Please provide the password as an argument (and, optionally, a new person\'s name and number): node mongo.js <password> <name> <number>')
@@ -16,15 +16,15 @@ mongoose.connect(process.env.MONGODB_URI, {
 const personSchema = new mongoose.Schema({
     name: String,
     number: String,
-});
+})
 
-const Person = mongoose.model('Person', personSchema);
+const Person = mongoose.model('Person', personSchema)
 
 if (process.argv.length === 5) {
-    const newName = process.argv[3];
-    const newNumber = process.argv[4];
+    const newName = process.argv[3]
+    const newNumber = process.argv[4]
 
-    const newPerson = new Person({name: newName, number: newNumber});
+    const newPerson = new Person({ name: newName, number: newNumber })
 
 
     newPerson.save().then(() =>
@@ -33,12 +33,12 @@ if (process.argv.length === 5) {
 } else if (process.argv.length === 3) {
     Person.find({}).then(res => {
         res.forEach(person => {
-                console.log(person)
-            }
-        );
+            console.log(person)
+        }
+        )
         mongoose.connection.close()
     }).catch(() => {
-        console.log("Database is empty or unreachable.")
+        console.log('Database is empty or unreachable.')
         mongoose.connection.close()
     })
 }

@@ -3,14 +3,21 @@ const app = express()
 const cors = require('cors')
 const blogsRouter = require("./controllers/blogs")
 const mongoose = require('mongoose')
-require('dotenv').config()
+const config = require('./utils/config')
+const logger = require('./utils/logger')
 
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(config.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
     useCreateIndex: true
 })
+    .then(() => {
+        logger.info('connected to MongoDB')
+    })
+    .catch((error) => {
+        logger.error('error connecting to MongoDB:', error.message)
+    })
 
 app.use(cors())
 app.use(express.json())

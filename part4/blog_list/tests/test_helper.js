@@ -46,11 +46,24 @@ const initialBlogs = [
     }
 ]
 
+const newBlog = {
+    title: 'PHP: a fractal of bad design',
+    author: 'Eevee',
+    url: 'https://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/',
+    likes: 6
+}
+
+const newBlogWithoutLikesProperty = {
+    title: 'PHP: a fractal of bad design',
+    author: 'Eevee',
+    url: 'https://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/',
+}
+
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(b => b.toJSON())
 }
 
 module.exports = {
-    initialBlogs, blogsInDb
+    initialBlogs, blogsInDb, newBlog, newBlogWithoutLikesProperty
 }

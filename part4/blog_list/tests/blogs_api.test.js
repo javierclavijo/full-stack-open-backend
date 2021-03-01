@@ -34,28 +34,37 @@ test('UUID property of blog posts is named "id"', async () => {
 })
 
 test('making an HTTP POST request successfully creates a new blog post', async () => {
-    const newBlog = {
-        title: 'PHP: a fractal of bad design',
-        author: 'Eevee',
-        url: 'https://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/',
-        likes: 6
-    }
-
     await api
         .post('/api/blogs')
-        .send(newBlog)
+        .send(helper.newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
     const blogs = await helper.blogsInDb()
     expect(blogs).toHaveLength(helper.initialBlogs.length + 1)
 
-    content = blogs.map(b => {
+    const content = blogs.map(b => {
         return {
             title: b.title, author: b.author, url: b.url, likes: b.likes
         }
     })
-    expect(content).toContainEqual(newBlog)
+    expect(content).toContainEqual(helper.newBlog)
+})
+
+test('if likes property is missing, it will default to 0', async () => {
+    await api
+        .post('/api/blogs')
+        .send(helper.newBlogWithoutLikesProperty)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const blogs = await helper.blogsInDb()
+    const content = blogs.map(b => {
+        return {
+            title: b.title, author: b.author, url: b.url, likes: b.likes
+        }
+    })
+    expect(content).toContainEqual({...helper.newBlogWithoutLikesProperty, likes: 0})
 })
 
 afterAll(async () => {

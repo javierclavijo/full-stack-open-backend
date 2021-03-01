@@ -67,6 +67,14 @@ test('if likes property is missing, it will default to 0', async () => {
     expect(content).toContainEqual({...helper.newBlogWithoutLikesProperty, likes: 0})
 })
 
+test('if title or url property is missing, response status code is 400', async () => {
+    for (let blog of [helper.blogsWithoutTitleAndURL])
+        await api
+            .post('/api/blogs')
+            .send(blog)
+            .expect(400)
+})
+
 afterAll(async () => {
     await mongoose.connection.close()
 })

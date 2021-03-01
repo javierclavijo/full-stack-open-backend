@@ -27,6 +27,13 @@ test('application returns blogs in JSON format', async () => {
         .expect('Content-type', /application\/json/)
 })
 
+test('UUID property of blog posts is named "id"', async () => {
+    const response = await api.get('/api/blogs')
+    for (let blog of response.body) {
+        expect(blog.id).toBeDefined()
+    }
+})
+
 afterAll(async () => {
     await mongoose.connection.close()
 })

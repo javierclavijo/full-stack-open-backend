@@ -4,6 +4,7 @@ const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require("../models/user");
 
 beforeEach(async () => {
     await Blog.deleteMany({})
@@ -12,6 +13,9 @@ beforeEach(async () => {
         let blogObject = new Blog(blog)
         await blogObject.save()
     }
+
+    await User.deleteMany({})
+
 })
 
 test('application returns the correct amount of blog posts', async () => {
@@ -33,22 +37,22 @@ test('UUID property of blog posts is named "id"', async () => {
     }
 })
 
-test('making an HTTP POST request successfully creates a new blog post', async () => {
+test('blog creation fails if token is not provided', async () => {
     await api
         .post('/api/blogs')
         .send(helper.newBlog)
-        .expect(201)
+        .expect(401)
         .expect('Content-Type', /application\/json/)
 
     const blogs = await helper.blogsInDb()
-    expect(blogs).toHaveLength(helper.initialBlogs.length + 1)
+    expect(blogs).toHaveLength(helper.initialBlogs.length)
 
     const content = blogs.map(b => {
         return {
             title: b.title, author: b.author, url: b.url, likes: b.likes
         }
     })
-    expect(content).toContainEqual(helper.newBlog)
+    expect(content).not.toContainEqual(helper.newBlog)
 })
 
 test('if likes property is missing, it will default to 0', async () => {
